@@ -1,0 +1,532 @@
+1#+TITLE: My-Emacs-configrations
+#+AUTHOR: Nithin Varghese
+#+email: nithinvarghese@outlook.com
+    
+
+
+*  Scratch Buffer
+I have very bad memory so things did to emacs are follows
+   #+BEGIN_SRC emacs-lisp
+     (setq initial-scratch-message ";; M-y see kill ring
+     ;; C-M-g in python for running region
+     ;; C-M- char for moving block
+     ;; M-z and C-M-z for zapping ")
+         
+   #+END_SRC
+
+
+* Appearance
+
+** Font
+   #+BEGIN_SRC emacs-lisp
+     ;;(set-face-attribute 'default nil :font "Monaco" :height 110 )
+     ;;(set-face-attribute 'default nil :font "Source Code Pro Medium" :height 110 )
+     (set-default-font "Input-13")
+   #+END_SRC
+
+   
+** Defaults Please
+   #+BEGIN_SRC emacs-lisp
+
+     ;; Keep all backup and auto-save files in one directory
+     (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
+     (setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
+
+     ;; UTF-8 please
+     (setq locale-coding-system 'utf-8) ; pretty
+     (set-terminal-coding-system 'utf-8) ; pretty
+     (set-keyboard-coding-system 'utf-8) ; pretty
+     (set-selection-coding-system 'utf-8) ; please
+     (prefer-coding-system 'utf-8) ; with sugar on top
+     (setq-default indent-tabs-mode nil)
+
+     ;; Turn off the blinking cursor
+     (blink-cursor-mode -1)
+     (column-number-mode t)
+     ;; delete the region when typing, just like as we expect nowadays.
+     (delete-selection-mode t)
+     (setq uniquify-buffer-name-style 'forward)
+
+     ;; -i gets alias definitions from .bash_profile
+     (setq shell-command-switch "-ic")
+
+   #+END_SRC
+
+
+** Theme
+   I like dark color as default
+   #+BEGIN_SRC emacs-lisp
+     (use-package material-theme
+       :init
+       (load-theme 'material t))
+
+   #+END_SRC
+
+*** Switching
+    I like swtching theme over time so
+    #+BEGIN_SRC emacs-lisp
+      (defun switch-theme (theme)
+        "Disables any currently active themes and loads THEME."
+        ;; This interactive call is taken from `load-theme'
+        (interactive
+         (list
+          (intern (completing-read "Load custom theme: "
+                                   (mapc 'symbol-name
+                                         (custom-available-themes))))))
+        (let ((enabled-themes custom-enabled-themes))
+          (mapc #'disable-theme custom-enabled-themes)
+          (load-theme theme t)))
+
+      (defun disable-active-themes ()
+        "Disables any currently active themes listed in `custom-enabled-themes'."
+        (interactive)
+        (mapc #'disable-theme custom-enabled-themes))
+
+      (bind-key "C-<f12>" 'switch-theme)
+      (bind-key "C-<f11>" 'disable-active-themes)
+    #+END_SRC
+* ShortCuts Redefined
+  #+BEGIN_SRC emacs-lisp
+    (bind-key  "M-=" 'text-scale-increase)
+    (bind-key  "M--" 'text-scale-decrease)
+
+    (bind-key "C-c b" 'eval-buffer)
+    (global-set-key (kbd "C-<f8>")
+                    (lambda () (interactive ) (find-file "~/.emacs.d/config.org"))
+                    )
+    (global-set-key (kbd "C-z") 'shell)
+
+  #+END_SRC
+
+** funcitons
+   #+BEGIN_SRC emacs-lisp
+     (defun move-line (n)
+       "Move the current line up or down by N lines."
+       (interactive "p")
+       (setq col (current-column))
+       (beginning-of-line) (setq start (point))
+       (end-of-line) (forward-char) (setq end (point))
+       (let ((line-text (delete-and-extract-region start end)))
+         (forward-line n)
+         (insert line-text)
+         ;; restore point to original column in moved line
+         (forward-line -1)
+         (forward-char col)))
+
+     (defun move-line-up (n)
+       "Move the current line up by N lines."
+       (interactive "p")
+       (move-line (if (null n) -1 (- n))))
+
+     (defun move-line-down (n)
+       "Move the current line down by N lines."
+       (interactive "p")
+       (move-line (if (null n) 1 n)))
+
+     (global-set-key (kbd "M-<down>") 'move-line-down)
+     (global-set-key (kbd "M-<up>") 'move-line-up)
+   #+END_SRC
+   #+BEGIN_SRC emacs-lisp
+     (defun copy-line (arg)
+       "Copy lines (as many as prefix argument) in the kill ring.
+           Ease of use features:
+           - Move to start of next line.
+           - Appends the copy on sequential calls.
+           - Use newline as last char even on the last line of the buffer.
+           - If region is active, copy its lines."
+       (interactive "p")
+       (let ((beg (line-beginning-position))
+             (end (line-end-position arg)))
+         (when mark-active
+           (if (> (point) (mark))
+               (setq beg (save-excursion (goto-char (mark)) (line-beginning-position)))
+             (setq end (save-excursion (goto-char (mark)) (line-end-position)))))
+         (if (eq last-command 'copy-line)
+             (kill-append (buffer-substring beg end) (< end beg))
+           (kill-ring-save beg end)))
+       (kill-append "\n" nil)
+       (beginning-of-line (or (and arg (1+ arg)) 2))
+       (if (and arg (not (= 1 arg))) (message "%d lines copied" arg)))
+
+
+     (defun copy-line (arg)
+       "Copy lines (as many as prefix argument) in the kill ring"
+       (interactive "p")
+       (kill-ring-save (line-beginning-position)
+                       (line-beginning-position (+ 1 arg)))
+       (message "%d line%s copied" arg (if (= 1 arg) "" "s")))
+     ;; optional key binding
+     (global-set-key "\C-c k" 'copy-line)
+
+   #+END_SRC
+
+* Elpa
+** company
+   #+BEGIN_SRC emacs-lisp
+     (use-package company
+       :ensure t
+       :defer t
+       :init (add-hook 'after-init-hook 'global-company-mode)
+       :config
+       (use-package company-irony :ensure t :defer t)
+
+       (setq company-idle-delay 0)
+
+       (setq company-backends
+             '((company-clang company-c-headers company-irony company-yasnippet company-elisp company-capf company-keywords company-gtags)))
+
+       )
+
+
+     ;; init
+     ;; (global-company-mode 1)
+     ;; (delete 'company-semantic company-backends))
+   #+END_SRC
+
+   #+RESULTS:
+** autopair
+   #+BEGIN_SRC emacs-lisp
+     ;; (use-package autopair
+     ;;   :diminish
+     ;;   :init
+     ;;   :config
+     ;;   (autopair-global-mode 1))
+
+   #+END_SRC
+** Smartparens
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package smartparens
+       :ensure t
+       :init
+       :config
+       (show-smartparens-global-mode t)
+       (smartparens-global-mode t)
+       )
+     ;; when you press RET, the curly braces automatically
+     ;; add another newline
+
+     (sp-with-modes '(c-mode c++-mode)
+                    (sp-local-pair "{" nil :post-handlers '(("||\n[i]" "RET")))
+                    (sp-local-pair "/*" "*/" :post-handlers '((" | " "SPC")
+                                                              ("* ||\n[i]" "RET"))))
+   #+END_SRC
+** Flycheck
+   #+BEGIN_SRC emacs-lisp
+     ;; (use-package flycheck
+     ;;   :ensure t
+     ;;   :init
+     ;;   ;;(setq flycheck-clang-language-standard "gnu99")
+     ;;   )
+
+
+     (use-package flycheck
+       :ensure t
+       :config
+       (setq flycheck-clang-language-standard "gnu99"))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package flycheck-tip
+       :commands (flycheck-tip-display-current-line-error-message)
+       :init
+       (setq flycheck-tip-avoid-show-func nil)
+       (setq flycheck-display-errors-function
+       #'flycheck-tip-display-current-line-error-message))
+
+     (add-hook 'c-mode-hook 'flycheck-mode)
+     ;;(add-hook 'python-mode-hook 'flycheck-mode)
+
+   #+END_SRC
+** diff-hl
+   #+BEGIN_SRC emacs-lisp
+    (use-package diff-hl
+      :ensure t
+      :diminish
+      :init
+      (global-diff-hl-mode 1)
+      (add-hook 'dired-mode-hook 'diff-hl-dired-mode))
+
+   #+END_SRC
+   
+** Irony Mode
+   
+   #+BEGIN_SRC emacs-lisp
+     (use-package irony
+       :ensure t
+       :defer t
+       :init
+       (add-hook 'c-mode-hook 'irony-mode)
+       (add-hook 'c++-mode-hook 'irony-mode)
+       (add-hook 'objc-mode-hook 'irony-mode)
+
+       :config
+
+       (defun my-irony-mode-hook ()
+         "replacing the completion-at-point and complete-sysmbol with irony"
+         (define-key irony-mode-map [remap completion-at-point]
+           'irony-completion-at-point)
+         (define-key irony-mode-map [remap complete-symbol]
+           'irony-completion-at-point)
+         )
+       (add-hook 'irony-mode-hook 'my-irony-mode-hook)
+       (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
+       )
+
+   #+END_SRC
+
+** which key
+   bring help for the key bindings
+   #+BEGIN_SRC emacs-lisp
+     (use-package which-key
+       :ensure t
+       :config
+       (which-key-mode))
+        
+   #+END_SRC
+   
+* Editting
+** Zapping
+   #+BEGIN_SRC emacs-lisp
+
+     (use-package ace-jump-zap
+       :ensure t
+       :bind
+       (("M-z" .  ace-jump-zap-up-to-char-dwim)
+        ("C-M-z" . ace-jump-zap-to-char-dwim)))
+   #+END_SRC
+
+* Programming
+** Python
+   I like using elpy but facing some problems in windows
+   #+BEGIN_SRC emacs-lisp
+     (use-package elpy
+       :defer 10
+       :init
+       (elpy-enable)
+       :config
+       (setq elpy-rpc-backend "jedi")
+       (setq python-shell-interpreter "python3")
+       (setq elpy-rpc-python-command "python3")
+       (setq elpy-shell-echo-input nil))
+
+
+
+     ;;;(elpy-use-ipython)  for ipython interperter
+
+     (when (require 'flycheck nil t)
+       (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+       (add-hook 'elpy-mode-hook 'flycheck-mode)
+       )
+     (use-package py-autopep8
+       :ensure t
+       :config
+       (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
+       )
+
+     (define-key python-mode-map (kbd "C-c l")
+       'python-shell-send-buffer)                    ;; python evak buffer
+     (define-key python-mode-map (kbd "C-M-g")
+       'python-shell-send-region)
+
+   #+END_SRC
+
+   #+RESULTS:
+
+*** Functions
+    Check the [[https://github.com/syohex/emacs-company-jedi][link]]
+    #+BEGIN_SRC emacs-lisp
+      (defun my/python-mode-hook ()
+        (add-to-list 'company-backends 'company-jedi))
+
+      (add-hook 'python-mode-hook 'my/python-mode-hook)
+      (add-hook 'python-mode-hook 'nlinum-mode)
+
+    #+END_SRC
+
+*** Ipython
+    #+BEGIN_SRC emacs-lisp
+      (require 'ein)
+      (require 'ein-loaddefs)
+      (require 'ein-notebook)
+      (require 'ein-subpackages)
+    #+END_SRC
+** C/C++
+*** Compilation Support
+    #+BEGIN_SRC emacs-lisp
+      (global-set-key (kbd "<f5>") (lambda ()
+                                     (interactive)
+                                     (setq-local compilation-read-command nil)
+                                     (call-interactively 'compile)))
+    #+END_SRC
+*** Qt
+    #+BEGIN_SRC emacs-lisp
+      (use-package qt-pro-mode
+        :ensure t
+        :mode ("\\.pro\\'" "\\.pri\\'"))
+    #+END_SRC
+qml edits
+#+BEGIN_SRC emacs-lisp
+  (use-package qml-mode
+    :ensure t
+    :mode ("\\.qml$" . qml-mode))
+  (add-to-list 'company-backends 'company-qml)
+#+END_SRC
+** Arduino
+*** Arduino-mode
+    #+BEGIN_SRC emacs-lisp
+      (add-to-list 'load-path "~/.emacs.d/vendor/arduino-mode")
+      (setq auto-mode-alist (cons '("\\.\\(pde\\|ino\\)$" . arduino-mode) auto-mode-alist))
+      (autoload 'arduino-mode "arduino-mode" "Arduino editing mode." t)
+    #+END_SRC
+*** Company
+    #+BEGIN_SRC 
+
+      ;; Emacs configuration
+      ;; If you installed this package from without MELPA, you may need
+
+      `(require 'company-arduino)'.
+
+      ;; Configuration for irony.el
+      ;; Add arduino's include options to irony-mode's variable.
+      (add-hook 'irony-mode-hook 'company-arduino-turn-on)
+
+      ;; Configuration for company-c-headers.el
+      ;; The `company-arduino-append-include-dirs' function appends
+      ;; Arduino's include directories to the default directories
+      ;; if `default-directory' is inside `company-arduino-home'. Otherwise just
+      ;; returns the default directories.
+      ;; Please change the default include directories accordingly.
+      (defun my-company-c-headers-get-system-path ()
+        "Return the system include path for the current buffer."
+        (let ((default '("/usr/include/" "/usr/local/include/")))
+          (company-arduino-append-include-dirs default t)))
+      (setq company-c-headers-path-system 'my-company-c-headers-get-system-path)
+
+      ;; Activate irony-mode on arudino-mode
+      (add-hook 'arduino-mode-hook 'irony-mode)
+
+      ;; If you are already using ‘company-irony’ and ‘company-c-headers’,
+      ;; you might have same setting. That case, you can omit below setting.
+      (add-to-list 'company-backends 'company-irony)
+      (add-to-list 'company-backends 'company-c-headers)
+
+
+    #+END_SRC
+** Processing
+   #+BEGIN_SRC emacs-lisp
+     (setq processing-location "~/softwares/processing-3.3.6/processing-java")
+     (setq processing-application-dir "/Pictures/designs/app")
+     (setq processing-sketchbook-dir "~/Pictures/designs")
+
+     (defun processing-mode-init ()
+       (make-local-variable 'ac-sources)
+       (setq ac-sources '(ac-source-dictionary ac-source-yasnippet))
+       (make-local-variable 'ac-user-dictionary)
+       (setq ac-user-dictionary (append processing-functions
+                                        processing-builtins
+                                        processing-constants)))
+
+     (add-hook 'processing-mode-hook 'processing-mode-init)
+   #+END_SRC
+* Org Mode
+
+** Appearance
+   I like things being pretty
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package org-bullets
+       :ensure t
+       :config
+       (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))
+     ))
+
+     ;;; simple setting for source editting
+     (setq org-src-window-setup 'current-window)
+
+
+
+   #+END_SRC
+** COMMENT Functions
+   #+BEGIN_SRC emacs-lisp
+
+
+     (defun my-org-mode-hook ()
+       (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
+
+     (defun my-org-auto-complete ()
+       "disable company and use autocomplete for org"
+       (interactive "P")
+       (setq company-global-modes '(not org-mode))
+       (org-ac/config-default))
+
+
+     (add-hook 'org-mode-hook #'my-org-mode-hook)
+     (add-hook 'org-mode-hook 'my-org-auto-complete)
+   #+END_SRC
+* Virtualenv
+  #+BEGIN_SRC emacs-lisp
+    (require 'virtualenvwrapper)
+    (venv-initialize-interactive-shells) ;; if you want interactive shell support
+    (venv-initialize-eshell) ;; if you want eshell support
+    ;; note that setting `venv-location` is not necessary if you
+    ;; use the default location (`~/.virtualenvs`), or if the
+    ;; the environment variable `WORKON_HOME` points to the right place
+    (setq venv-location "~/virtual")
+    ;;(setq venv-location "~/work")
+  #+END_SRC
+* Web-dev
+** web-mode
+   #+BEGIN_SRC emacs-lisp
+     (require 'web-mode)
+     (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
+     (add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
+     (add-to-list 'auto-mode-alist '("\\.html\\.twig\\'" . web-mode))
+     (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+
+     (setq web-mode-engines-alist
+           '(("php"    . "\\.phtml\\'")
+             ("blade"  . "\\.blade\\."))
+           )
+     (add-hook 'web-mode-hook 'emmet-mode)
+     ;;        (add-hook 'web-mode-hook 'nlinum-mode)
+
+     (add-to-list 'auto-mode-alist '("\\.api\\'" . web-mode))
+     (add-to-list 'auto-mode-alist '("/some/react/path/.*\\.js[x]?\\'" . web-mode))
+
+     (setq web-mode-content-types-alist
+           '(("json" . "/some/path/.*\\.api\\'")
+             ("xml"  . "/other/path/.*\\.api\\'")
+             ("jsx"  . "/some/react/path/.*\\.js[x]?\\'")))
+
+   #+END_SRC
+
+
+** Emmet mode
+   #+BEGIN_SRC emacs-lisp
+          (use-package emmet-mode
+            :ensure t
+            :config
+            (add-hook 'sgml-mode-hook 'emmet-mode)
+            (add-hook 'css-mode-hook 'emmet-mode)
+            (add-hook 'html-mode 'emmet-mode)
+            (add-hook 'php-mode 'emmet-mode)
+
+            (setq emmet-move-cursor-between-quotes 1)
+            )
+
+          (add-hook 'sgml-mode-hook 'rainbow-mode)
+          (add-hook 'css-mode-hook 'rainbow-mode)
+   #+END_SRC
+
+* Magit
+
+  This something of kind , still long way to go
+  #+BEGIN_SRC emacs-lisp
+    (use-package magit
+      :ensure t
+      :defer t)
+    (global-set-key (kbd "C-x g") 'magit-status)
+  #+END_SRC
+
+* Testing function

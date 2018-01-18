@@ -1,0 +1,4 @@
+# key: compile
+# name: compile
+# --
+// g++ -ansi -pedantic-errors -Wall $1
