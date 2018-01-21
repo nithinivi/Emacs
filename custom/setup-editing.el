@@ -8,10 +8,6 @@
 (add-hook 'sh-mode-hook (lambda ()
                           (setq tab-width 4)))
 
-(set-terminal-coding-system 'utf-8)
-(set-keyboard-coding-system 'utf-8)
-(set-language-environment "UTF-8")
-(prefer-coding-system 'utf-8)
 
 (setq-default indent-tabs-mode nil)
 (delete-selection-mode)
@@ -64,6 +60,7 @@
   (define-key yas-minor-mode-map (kbd "<tab>") 'yas-expand)
   (define-key yas-minor-mode-map (kbd "TAB") 'yas-expand)
   (add-hook 'prog-mode-hook 'yas-minor-mode))
+
 
 ;; Package: clean-aindent-mode
 (use-package clean-aindent-mode

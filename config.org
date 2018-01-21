@@ -1,6 +1,6 @@
 1#+TITLE: My-Emacs-configrations
 #+AUTHOR: Nithin Varghese
-#+email: nithinvarghese@outlook.com
+#+email: nithinnivi@gmail.com
     
 
 
@@ -38,7 +38,12 @@ I have very bad memory so things did to emacs are follows
      (set-keyboard-coding-system 'utf-8) ; pretty
      (set-selection-coding-system 'utf-8) ; please
      (prefer-coding-system 'utf-8) ; with sugar on top
+     (set-language-environment "UTF-8")
+
+
      (setq-default indent-tabs-mode nil)
+
+
 
      ;; Turn off the blinking cursor
      (blink-cursor-mode -1)
