@@ -61,9 +61,8 @@
 (use-package yasnippet
   :defer t
   :init
-  (define-key yas-minor-mode-map (kbd "<tab>") nil)
-  (define-key yas-minor-mode-map (kbd "TAB") nil)
-  (define-key yas-minor-mode-map (kbd "C-.") 'yas-expand)
+  (define-key yas-minor-mode-map (kbd "<tab>") 'yas-expand)
+  (define-key yas-minor-mode-map (kbd "TAB") 'yas-expand)
   (add-hook 'prog-mode-hook 'yas-minor-mode))
 
 ;; Package: clean-aindent-mode
@@ -93,7 +92,8 @@
   :init
   (global-anzu-mode)
   (global-set-key (kbd "M-%") 'anzu-query-replace)
-  (global-set-key (kbd "C-M-%") 'anzu-query-replace-regexp))
+  (global-set-key (kbd "C-M-%") 'anzu-query-replace-regexp)
+  :diminish anzu-mode)
 
 ;; PACKAGE: iedit
 (use-package iedit
