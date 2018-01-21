@@ -51,7 +51,9 @@
   :bind(
         ("C-}" . undo-tree-undo)
         ("C-{" . undo-tree-redo)
-        ))
+        )
+  :config
+  (diminish 'undo-tree-mode))
 
 ;; Package: yasnippet
 ;; GROUP: Editing -> Yasnippet

@@ -198,6 +198,7 @@ I have very bad memory so things did to emacs are follows
    #+BEGIN_SRC emacs-lisp
      (use-package smartparens
        :ensure t
+       :defer t
        :init
        :config
        (show-smartparens-global-mode t)
@@ -222,6 +223,7 @@ I have very bad memory so things did to emacs are follows
 
      (use-package flycheck
        :ensure t
+       :defer t
        :config
        (setq flycheck-clang-language-standard "gnu99"))
    #+END_SRC
@@ -240,12 +242,15 @@ I have very bad memory so things did to emacs are follows
    #+END_SRC
 ** diff-hl
    #+BEGIN_SRC emacs-lisp
-    (use-package diff-hl
-      :ensure t
-      :diminish
-      :init
-      (global-diff-hl-mode 1)
-      (add-hook 'dired-mode-hook 'diff-hl-dired-mode))
+     (use-package diff-hl
+       :ensure t
+       :diminish diff-hl
+       :init
+       (global-diff-hl-mode 1)
+       (dolist (hook '(prog-mode-hook text-mode-hook
+                                      conf-mode-hook))
+         (add-hook hook #'diff-hl-mode))
+       (add-hook 'dired-mode-hook 'diff-hl-dired-mode))
 
    #+END_SRC
    
@@ -280,6 +285,8 @@ I have very bad memory so things did to emacs are follows
    #+BEGIN_SRC emacs-lisp
      (use-package which-key
        :ensure t
+       :defer t
+       :diminish which-key
        :config
        (which-key-mode))
         
@@ -295,13 +302,13 @@ I have very bad memory so things did to emacs are follows
        (("M-z" .  ace-jump-zap-up-to-char-dwim)
         ("C-M-z" . ace-jump-zap-to-char-dwim)))
    #+END_SRC
-
+   
 * Programming
 ** Python
    I like using elpy but facing some problems in windows
    #+BEGIN_SRC emacs-lisp
      (use-package elpy
-       :defer 10
+       :defer t
        :init
        (elpy-enable)
        :config
@@ -524,9 +531,9 @@ qml edits
   This something of kind , still long way to go
   #+BEGIN_SRC emacs-lisp
     (use-package magit
+      :bind ("C-x g" . magit-status)
       :ensure t
       :defer t)
-    (global-set-key (kbd "C-x g") 'magit-status)
   #+END_SRC
 
 * Testing function
