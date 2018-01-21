@@ -16,7 +16,6 @@ I have very bad memory so things did to emacs are follows
 
 
 * Appearance
-
 ** Font
    #+BEGIN_SRC emacs-lisp
      ;;(set-face-attribute 'default nil :font "Monaco" :height 110 )
@@ -24,7 +23,6 @@ I have very bad memory so things did to emacs are follows
      (set-default-font "Input-13")
    #+END_SRC
 
-   
 ** Defaults Please
    #+BEGIN_SRC emacs-lisp
 
@@ -55,8 +53,14 @@ I have very bad memory so things did to emacs are follows
      ;; -i gets alias definitions from .bash_profile
      (setq shell-command-switch "-ic")
 
-   #+END_SRC
 
+   #+END_SRC
+   I like to the window to splited automaticallly side my side 
+   - [[https://stackoverflow.com/questions/2081577/setting-emacs-split-to-horizontal][stackoverflow]]
+     #+BEGIN_SRC 
+       (setq split-height-threshold nil)
+       (setq split-width-threshold 0)
+     #+END_SRC
 
 ** Theme
    I like dark color as default
@@ -90,6 +94,7 @@ I have very bad memory so things did to emacs are follows
       (bind-key "C-<f12>" 'switch-theme)
       (bind-key "C-<f11>" 'disable-active-themes)
     #+END_SRC
+             
 * ShortCuts Redefined
   #+BEGIN_SRC emacs-lisp
     (bind-key  "M-=" 'text-scale-increase)
@@ -174,18 +179,20 @@ I have very bad memory so things did to emacs are follows
        :init (add-hook 'after-init-hook 'global-company-mode)
        :config
        (use-package company-irony :ensure t :defer t)
+       (use-package company-quickhelp :ensure t :defer t
+         :diminish company-quickhelp-mode
+         :init
+         (company-quickhelp-mode 1)
+         :config
+         (define-key company-active-map (kbd "C-v") #'company-quickhelp-manual-begin)
+         )
 
        (setq company-idle-delay 0)
 
        (setq company-backends
              '((company-clang company-c-headers company-irony company-yasnippet company-elisp company-capf company-keywords company-gtags)))
-
        )
 
-
-     ;; init
-     ;; (global-company-mode 1)
-     ;; (delete 'company-semantic company-backends))
    #+END_SRC
 
    #+RESULTS:
@@ -201,21 +208,61 @@ I have very bad memory so things did to emacs are follows
 ** Smartparens
 
    #+BEGIN_SRC emacs-lisp
-     (use-package smartparens
-       :ensure t
-       :defer t
-       :init
+     (use-package smartparens-config
+       :ensure smartparens
        :config
-       (show-smartparens-global-mode t)
-       (smartparens-global-mode t)
-       )
-     ;; when you press RET, the curly braces automatically
-     ;; add another newline
+       (progn
+         (show-smartparens-global-mode t))
+       (bind-keys
+      :map smartparens-mode-map
+      ("C-M-a" . sp-beginning-of-sexp)
+      ("C-M-e" . sp-end-of-sexp)
 
-     (sp-with-modes '(c-mode c++-mode)
-                    (sp-local-pair "{" nil :post-handlers '(("||\n[i]" "RET")))
-                    (sp-local-pair "/*" "*/" :post-handlers '((" | " "SPC")
-                                                              ("* ||\n[i]" "RET"))))
+      ("C-<down>" . sp-down-sexp)
+      ("C-<up>"   . sp-up-sexp)
+      ("M-<down>" . sp-backward-down-sexp)
+      ("M-<up>"   . sp-backward-up-sexp)
+
+      ("C-M-f" . sp-forward-sexp)
+      ("C-M-b" . sp-backward-sexp)
+
+      ("C-M-n" . sp-next-sexp)
+      ("C-M-p" . sp-previous-sexp)
+
+      ("C-S-f" . sp-forward-symbol)
+      ("C-S-b" . sp-backward-symbol)
+
+      ("C-<right>" . sp-forward-slurp-sexp)
+      ("M-<right>" . sp-forward-barf-sexp)
+      ("C-<left>"  . sp-backward-slurp-sexp)
+      ("M-<left>"  . sp-backward-barf-sexp)
+
+      ("C-M-t" . sp-transpose-sexp)
+      ("C-M-k" . sp-kill-sexp)
+      ("C-k"   . sp-kill-hybrid-sexp)
+      ("M-k"   . sp-backward-kill-sexp)
+      ("C-M-w" . sp-copy-sexp)
+      ("C-M-d" . delete-sexp)
+
+      ("M-<backspace>" . backward-kill-word)
+      ("C-<backspace>" . sp-backward-kill-word)
+      ([remap sp-backward-kill-word] . backward-kill-word)
+
+      ("M-[" . sp-backward-unwrap-sexp)
+      ("M-]" . sp-unwrap-sexp)
+
+      ("C-x C-t" . sp-transpose-hybrid-sexp)
+
+      ("C-c ("  . wrap-with-parens)
+      ("C-c ["  . wrap-with-brackets)
+      ("C-c {"  . wrap-with-braces)
+     ; ("C-c '"  . wrap-with-single-quotes)
+      ("C-c \"" . wrap-with-double-quotes)
+      ("C-c _"  . wrap-with-underscores)
+      ("C-c `"  . wrap-with-back-quotes)))
+     (add-hook 'prog-mode-hook 'turn-on-smartparens-strict-mode)
+     (add-hook 'markdown-mode-hook 'turn-on-smartparens-strict-mode)
+     ;;
    #+END_SRC
 ** Flycheck
    #+BEGIN_SRC emacs-lisp
@@ -365,7 +412,7 @@ I have very bad memory so things did to emacs are follows
     #+END_SRC
 ** C/C++
 *** Compilation Support
-    #+BEGIN_SRC emacs-lisp
+    #+BEGIN_SRC 
       (global-set-key (kbd "<f5>") (lambda ()
                                      (interactive)
                                      (setq-local compilation-read-command nil)
@@ -449,7 +496,7 @@ qml edits
    #+BEGIN_SRC emacs-lisp
      (use-package org-bullets
        :ensure t
-       :config
+       :init
        (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))
      ))
 
@@ -542,3 +589,5 @@ qml edits
   #+END_SRC
 
 * Testing function
+
+

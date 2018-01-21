@@ -69,12 +69,14 @@
 
 ;; Package: dtrt-indent
 (use-package dtrt-indent
+  :diminish dtrt-indent-mode
   :init
   (dtrt-indent-mode 1)
   (setq dtrt-indent-verbosity 0))
 
 ;; Package: ws-butler
 (use-package ws-butler
+  :diminish ws-butler-mode
   :init
   (add-hook 'prog-mode-hook 'ws-butler-mode)
   (add-hook 'text-mode 'ws-butler-mode)

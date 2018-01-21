@@ -1,4 +1,5 @@
 (require 'package)
+(require 'json)
 (add-to-list 'package-archives
          '("melpa" . "http://melpa.org/packages/") t)
 (add-to-list 'package-archives
@@ -37,6 +38,10 @@
  ;; If there is more than one, they won't work right.
  '(ansi-color-faces-vector
    [default bold shadow italic underline bold bold-italic bold])
+ '(company-backends
+   (quote
+    (company-qml
+     (company-clang company-c-headers company-irony company-yasnippet company-elisp company-capf company-keywords company-gtags))))
  '(compilation-message-face (quote default))
  '(cua-global-mark-cursor-color "#2aa198")
  '(cua-normal-cursor-color "#839496")
@@ -72,7 +77,7 @@
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
  '(package-selected-packages
    (quote
-    (company-quickhelp magit ace-jump-zap py-autopep8 material-theme ein zygospore yasnippet-snippets ws-butler which-key web-mode volatile-highlights virtualenvwrapper use-package undo-tree swiper solarized-theme smartparens rainbow-mode qt-pro-mode processing-snippets processing-mode pos-tip org-bullets nlinum impatient-mode iedit helm-swoop helm-projectile ggtags flycheck-tip emmet-mode elpy dtrt-indent diff-hl company-qml company-irony-c-headers company-arduino clean-aindent-mode autopair anzu 0blayout)))
+    (smartparens-config elpy company-quickhelp magit ace-jump-zap py-autopep8 material-theme ein zygospore yasnippet-snippets ws-butler which-key web-mode volatile-highlights virtualenvwrapper use-package undo-tree swiper solarized-theme smartparens rainbow-mode qt-pro-mode processing-snippets processing-mode pos-tip org-bullets nlinum impatient-mode iedit helm-swoop helm-projectile ggtags flycheck-tip emmet-mode dtrt-indent diff-hl company-qml company-irony-c-headers company-arduino clean-aindent-mode autopair anzu 0blayout)))
  '(pos-tip-background-color "#073642")
  '(pos-tip-foreground-color "#93a1a1")
  '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#073642" 0.2))
