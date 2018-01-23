@@ -16,11 +16,68 @@ I have very bad memory so things did to emacs are follows
 
 
 * Appearance
+
+** General
+   #+BEGIN_SRC emacs-lisp
+     (menu-bar-mode 1)
+     (tool-bar-mode -1)
+     (scroll-bar-mode -1)
+     (setq gc-cons-threshold 100000000)
+     (setq inhibit-startup-message t)
+
+     (defalias 'yes-or-no-p 'y-or-n-p)
+
+     ;; show unncessary whitespace that can mess up your diff
+     (add-hook 'prog-mode-hook
+               (lambda () (interactive)
+                 (setq show-trailing-whitespace 1)))
+
+     ;; use space to indent by default
+     (setq-default indent-tabs-mode nil)
+
+     ;; set appearance of a tab that is represented by 4 spaces
+     (setq-default tab-width 4)
+
+     ;; Compilation
+     (global-set-key (kbd "<f5>") (lambda ()
+                                    (interactive)
+                                    (setq-local compilation-read-command nil)
+                                    (call-interactively 'compile)))
+
+     ;; setup GDB
+     (setq
+      ;; use gdb-many-windows by default
+      gdb-many-windows t
+
+      ;; Non-nil means display source file containing the main routine at startup
+      gdb-show-main t
+      )
+
+
+     ;; Package: projejctile
+     ;; ;; (use-package projectile
+     ;; ;;   :init
+     ;; ;;   (projectile-global-mode)
+     ;; ;;   (setq projectile-enable-caching t))
+
+     ;; Package zygospore
+     (use-package zygospore
+       :bind (("C-x 1" . zygospore-toggle-delete-other-windows)
+              ("RET" .   newline-and-indent)))
+
+       ; automatically indent when press RET
+
+     ;; activate whitespace-mode to view all whitespace characters
+     (global-set-key (kbd "C-c w") 'whitespace-mode)
+     (windmove-default-keybindings)
+
+
+   #+END_SRC
 ** Font
    #+BEGIN_SRC emacs-lisp
      ;;(set-face-attribute 'default nil :font "Monaco" :height 110 )
      ;;(set-face-attribute 'default nil :font "Source Code Pro Medium" :height 110 )
-     (set-default-font "Input-13")
+     (set-frame-font "Input-13")
    #+END_SRC
 
 ** Defaults Please
@@ -210,7 +267,6 @@ I have very bad memory so things did to emacs are follows
      (use-package flycheck-tip
        :commands (flycheck-tip-display-current-line-error-message)
        :init
-       (setq flycheck-tip-avoid-show-func nil)
        (setq flycheck-display-errors-function
        #'flycheck-tip-display-current-line-error-message))
 
