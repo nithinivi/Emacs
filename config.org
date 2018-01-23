@@ -475,6 +475,12 @@ I have very bad memory so things did to emacs are follows
      (global-set-key (kbd "C-x k") 'kill-this-buffer)
         
    #+END_SRC
+** Editting Perlude
+   #+BEGIN_SRC emacs-lisp
+     (add-to-list 'load-path "~/.emacs.d/custom")
+     (require 'setup-editing)
+
+   #+END_SRC
 * Programming
 ** Python
    I like using elpy but facing some problems in windows

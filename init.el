@@ -28,9 +28,6 @@
 (setq use-package-always-ensure t)
 (org-babel-load-file (concat user-emacs-directory "config.org"))
 
-(add-to-list 'load-path "~/.emacs.d/custom")
-
-(require 'setup-editing)
 
 ;;; Load the my config
 
