@@ -1,9 +1,21 @@
 (require 'package)
 (require 'json)
+
+(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
+                    (not (gnutls-available-p))))
+       (proto (if no-ssl "http" "https")))
+  ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
+  (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
+  ;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
+  (when (< emacs-major-version 24)
+    ;; For important compatibility libraries like cl-lib
+    (add-to-list 'package-archives '("gnu" . (concat proto "://elpa.gnu.org/packages/")))))
 (add-to-list 'package-archives
-         '("melpa" . "http://melpa.org/packages/") t)
+             '("melpa-stable" . "https://stable.melpa.org/packages/") t)
 (add-to-list 'package-archives
              '("elpy" . "https://jorgenschaefer.github.io/packages/"))
+(add-to-list 'package-archives
+             '("marmalade" . "https://marmalade-repo.org/packages/"))
 (package-initialize)
 
 (when (not package-archive-contents)
@@ -19,12 +31,12 @@
 (add-to-list 'load-path "~/.emacs.d/custom")
 
 (require 'setup-general)
- (if (version< emacs-version "24.4")
-     (require 'setup-ivy-counsel)
-   (require 'setup-helm))
+ ;;(if (version< emacs-version "24.4")
+   ;;  (require 'setup-ivy-counsel)
+  ;; (require 'setup-helm))
   ;;  (require 'setup-helm-gtags)
-(require 'setup-ggtags)
-(require 'setup-cedet)
+;;(require 'setup-ggtags)
+;;(require 'setup-cedet)
 (require 'setup-editing)
 
 ;;; Load the my config
@@ -38,6 +50,8 @@
  ;; If there is more than one, they won't work right.
  '(ansi-color-faces-vector
    [default bold shadow italic underline bold bold-italic bold])
+ '(ansi-color-names-vector
+   (vector "#ffffff" "#f36c60" "#8bc34a" "#fff59d" "#4dd0e1" "#b39ddb" "#81d4fa" "#263238"))
  '(company-backends
    (quote
     (company-qml
@@ -47,6 +61,7 @@
  '(cua-normal-cursor-color "#839496")
  '(cua-overwrite-cursor-color "#b58900")
  '(cua-read-only-cursor-color "#859900")
+ '(fci-rule-color "#37474f")
  '(highlight-changes-colors (quote ("#d33682" "#6c71c4")))
  '(highlight-symbol-colors
    (--map
@@ -77,13 +92,35 @@
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
  '(package-selected-packages
    (quote
-    (smartparens-config elpy company-quickhelp magit ace-jump-zap py-autopep8 material-theme ein zygospore yasnippet-snippets ws-butler which-key web-mode volatile-highlights virtualenvwrapper use-package undo-tree swiper solarized-theme smartparens rainbow-mode qt-pro-mode processing-snippets processing-mode pos-tip org-bullets nlinum impatient-mode iedit helm-swoop helm-projectile ggtags flycheck-tip emmet-mode dtrt-indent diff-hl company-qml company-irony-c-headers company-arduino clean-aindent-mode autopair anzu 0blayout)))
+    (ivy-hydra counsel-projectile counsel arjen-grey-theme smartparens-config elpy company-quickhelp magit ace-jump-zap py-autopep8 material-theme ein zygospore yasnippet-snippets ws-butler which-key web-mode volatile-highlights virtualenvwrapper use-package undo-tree swiper solarized-theme smartparens rainbow-mode qt-pro-mode processing-snippets processing-mode pos-tip org-bullets nlinum impatient-mode iedit helm-swoop helm-projectile ggtags flycheck-tip emmet-mode dtrt-indent diff-hl company-qml company-irony-c-headers company-arduino clean-aindent-mode autopair anzu 0blayout)))
  '(pos-tip-background-color "#073642")
  '(pos-tip-foreground-color "#93a1a1")
  '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#073642" 0.2))
  '(term-default-bg-color "#002b36")
  '(term-default-fg-color "#839496")
+ '(vc-annotate-background nil)
  '(vc-annotate-background-mode nil)
+ '(vc-annotate-color-map
+   (quote
+    ((20 . "#f36c60")
+     (40 . "#ff9800")
+     (60 . "#fff59d")
+     (80 . "#8bc34a")
+     (100 . "#81d4fa")
+     (120 . "#4dd0e1")
+     (140 . "#b39ddb")
+     (160 . "#f36c60")
+     (180 . "#ff9800")
+     (200 . "#fff59d")
+     (220 . "#8bc34a")
+     (240 . "#81d4fa")
+     (260 . "#4dd0e1")
+     (280 . "#b39ddb")
+     (300 . "#f36c60")
+     (320 . "#ff9800")
+     (340 . "#fff59d")
+     (360 . "#8bc34a"))))
+ '(vc-annotate-very-old-color nil)
  '(weechat-color-list
    (quote
     (unspecified "#002b36" "#073642" "#990A1B" "#dc322f" "#546E00" "#859900" "#7B6000" "#b58900" "#00629D" "#268bd2" "#93115C" "#d33682" "#00736F" "#2aa198" "#839496" "#657b83")))
